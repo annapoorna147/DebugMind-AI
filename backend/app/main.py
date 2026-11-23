@@ -1,3 +1,4 @@
+from app.api.routes.debug import router as debug_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,6 +7,8 @@ app = FastAPI(
     description="AI-Powered Intelligent Debugging Assistant",
     version="1.0.0"
 )
+
+app.include_router(debug_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
