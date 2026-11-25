@@ -1,6 +1,7 @@
 from app.services.analyzer.syntax_analyzer import analyze_syntax
 from app.services.analyzer.traceback_analyzer import analyze_traceback
 from app.services.analyzer.static_analyzer import analyze_static
+from app.services.analyzer.bug_pattern_analyzer import analyze_bug_patterns
 
 
 def detect_bugs(code: str, traceback_text: str | None = None) -> dict:
@@ -26,11 +27,13 @@ def detect_bugs(code: str, traceback_text: str | None = None) -> dict:
     )
 
     static_result = analyze_static(code)
+    bug_patterns_result = analyze_bug_patterns(code)
 
     return {
         "status": "completed",
         "syntax": syntax_result,
         "traceback": traceback_result,
         "static_analysis": static_result,
+        "bug_patterns": bug_patterns_result,
         "summary": "Debugging analysis completed."
     }

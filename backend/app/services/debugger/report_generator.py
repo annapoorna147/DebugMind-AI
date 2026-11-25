@@ -1,17 +1,20 @@
 def generate_report(analysis: dict) -> dict:
     """
-    Convert debugging analysis into a readable report.
+    Convert all debugging analysis results into a readable report.
     """
 
     if analysis.get("status") != "completed":
         return {
             "status": "failed",
             "title": "Debugging Report",
-            "findings": [analysis.get("summary", "Analysis failed.")]
+            "total_findings": 0,
+            "findings": [],
+            "summary": analysis.get("summary", "Analysis failed.")
         }
 
     findings = []
 
+    # Syntax findings
     syntax = analysis.get("syntax", {})
 
     if syntax.get("status") == "valid":
@@ -28,6 +31,7 @@ def generate_report(analysis: dict) -> dict:
             "line": syntax.get("line")
         })
 
+    # Runtime findings
     traceback = analysis.get("traceback")
 
     if traceback:
@@ -35,13 +39,14 @@ def generate_report(analysis: dict) -> dict:
             "category": "Runtime",
             "severity": "error",
             "message": (
-                f"{traceback['error_type']}: "
-                f"{traceback['message']}"
+                f"{traceback.get('error_type', 'RuntimeError')}: "
+                f"{traceback.get('message', 'Runtime error detected.')}"
             ),
             "file": traceback.get("file"),
             "line": traceback.get("line")
         })
 
+    # Ruff static analysis findings
     static_analysis = analysis.get("static_analysis", {})
 
     for issue in static_analysis.get("issues", []):
@@ -52,6 +57,19 @@ def generate_report(analysis: dict) -> dict:
             "message": issue.get("message"),
             "line": issue.get("line"),
             "column": issue.get("column")
+        })
+
+    # AST-based bug pattern findings
+    bug_patterns = analysis.get("bug_patterns", {})
+
+    for issue in bug_patterns.get("issues", []):
+        findings.append({
+            "category": "Bug Pattern",
+            "severity": issue.get("severity", "warning"),
+            "code": issue.get("code"),
+            "message": issue.get("message"),
+            "suggestion": issue.get("suggestion"),
+            "line": issue.get("line")
         })
 
     return {
