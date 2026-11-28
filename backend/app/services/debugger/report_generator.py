@@ -1,6 +1,7 @@
 def generate_report(analysis: dict) -> dict:
     """
-    Convert all debugging analysis results into a readable report.
+    Convert debugging analysis results into a readable report.
+    Includes runtime root-cause analysis and suggested fixes.
     """
 
     if analysis.get("status") != "completed":
@@ -31,10 +32,12 @@ def generate_report(analysis: dict) -> dict:
             "line": syntax.get("line")
         })
 
-    # Runtime findings
+    # Runtime findings with root-cause analysis
     traceback = analysis.get("traceback")
 
     if traceback:
+        root_cause = traceback.get("root_cause") or {}
+
         findings.append({
             "category": "Runtime",
             "severity": "error",
@@ -43,7 +46,11 @@ def generate_report(analysis: dict) -> dict:
                 f"{traceback.get('message', 'Runtime error detected.')}"
             ),
             "file": traceback.get("file"),
-            "line": traceback.get("line")
+            "line": traceback.get("line"),
+            "root_cause": root_cause.get("description"),
+            "details": root_cause.get("details"),
+            "suggestion": root_cause.get("suggestion"),
+            "frames": traceback.get("frames", [])
         })
 
     # Ruff static analysis findings
